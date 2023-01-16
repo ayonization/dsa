@@ -1,0 +1,23 @@
+Hypothesis Induction Base Condition method
+
+1) Hypothesis 
+
+Assume function solves the problem.
+print(n) prints 1 2 3 4 .... n
+
+2)Induction
+
+Call the function at smaller input
+print(n) -> 1 2 3 4 ... n
+print(n-1)-> 1 2 3 ... n-1
+Thus just print n after calling print(n-1)
+print(n) = print(n-1)+ "n"
+
+3) Base Condition
+
+Find smallest valid input or largest invalid input
+Stop Recursion
+
+
+
+

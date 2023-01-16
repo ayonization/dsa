@@ -1,0 +1,1 @@
+{"name":"Local: 3_Count_Occurences_of_anagrams","url":"c:\\Users\\ayon.sen\\cpp\\sliding_window\\3_Count_Occurences_of_anagrams.cpp","tests":[{"id":1671032962361,"input":"cbaebabacd\nabc","output":"2"}],"interactive":false,"memoryLimit":1024,"timeLimit":3000,"srcPath":"c:\\Users\\ayon.sen\\cpp\\sliding_window\\3_Count_Occurences_of_anagrams.cpp","group":"local","local":true}

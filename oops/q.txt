@@ -1,0 +1,84 @@
+with abc as 
+(select celldataid, batterymoduleid, cast(timestamp as timestamp) as event_time, stationnumber, vehiclemodel, case when cast(timestamp as date) = cast(cast(current_timestamp as timestamp) + interval '330' minute as date) then 1 else 0 end as today_cell,
+case when cast(timestamp as date) < cast(cast(current_timestamp as timestamp) + interval '330' minute as date) then 1 else 0 end as hist_cell ,
+case when cast(timestamp as timestamp) between timestamp'2022-01-01 00:00:00' and timestamp'2023-12-31 23:59:59' then 1 else 0 end as latest_run_cell,
+case when (length(celldataid) in (18,10)) and 
+(regexp_like(celldataid, '^[A-Z][1-9A-Z][\dA-Z]{3}[ABCDEFGHIJKLMNOPQRST][ABCDEFGHIJKL](0[1-9]|[12]\d|3[01])[1-9A-Z][\dA-Z]{2}[\d]{6}') = true) then 1 else 0 end as correct_cellid
+from ms_sql_datalake_db.dbo.vw_celldata_mes
+-- where cast(timestamp as timestamp) between timestamp'2022-12-02 22:00:00' and timestamp'2022-12-03 05:59:59'
+where batterymoduleid = '3LAB29MC0296'
+-- '4RAB02MC0070',
+-- '4LAB02MC0069',
+-- '4LAB02MC0070')
+),
+
+time as (
+select batterymoduleid, max(event_time) as lat_time from abc
+where correct_cellid = 1
+group by batterymoduleid
+),
+
+
+faulty as (select celldataid, count(distinct batterymoduleid) as cnt from abc
+where correct_cellid = 1 and celldataid in (select distinct celldataid from abc where latest_run_cell = 1)
+group by celldataid
+having count(distinct batterymoduleid) > 1),
+
+fault2 as (select distinct batterymoduleid, 'fault2' as fault_flag from abc
+where celldataid in (select distinct celldataid from faulty where cnt > 1)),
+
+-----
+
+repeated as (select celldataid, batterymoduleid, count(batterymoduleid) as cell_cnt from abc
+where correct_cellid = 1 and celldataid in (select distinct celldataid from abc where latest_run_cell = 1)
+group by celldataid, batterymoduleid
+having count(batterymoduleid) > 1),
+
+fault1 as (
+
+select distinct a.batterymoduleid, a.fault_flag from 
+(select distinct batterymoduleid, celldataid, 'fault1' as fault_flag from abc
+where latest_run_cell = 1)a
+
+JOIN 
+(select distinct batterymoduleid, celldataid from repeated where cell_cnt > 1)b
+on a.batterymoduleid = b.batterymoduleid and a.celldataid = b.celldataid
+),
+
+------
+
+fault3 as (select distinct batterymoduleid, 'fault3' as fault_flag from 
+(select a.*, case when cast(vehiclemodel as int) = 1 and cell_cnt_1 = 112 then 0 else 1 end as s1_pro_flag, 
+case when cast(vehiclemodel as int) = 2 and cell_cnt_1 = 84 then 0 else 1 end as s1_flag from 
+(select batterymoduleid, vehiclemodel, count(distinct celldataid) as cell_cnt_1 from abc
+where correct_cellid = 1 and celldataid in (select distinct celldataid from abc where latest_run_cell = 1)
+group by batterymoduleid, vehiclemodel)a)b
+where s1_pro_flag = s1_flag)
+
+select w.batterymoduleid, w.stationnumber,w.vehiclemodel,w.status, t.lat_time, 
+ARRAY_JOIN(ARRAY_AGG(fault_type), ',') faults
+
+-- flatten(array_agg(fault_type)) as faults 
+from 
+(select distinct x.batterymoduleid,x.stationnumber,x.vehiclemodel,fault_flag
+, case when fault_flag = 'fault1' then 'fault1'
+when fault_flag = 'fault2' then 'fault2'
+when fault_flag = 'fault3' then 'fault3' end as fault_type
+
+,case when x.fault_flag is not null then 'not ok' else 'ok' end as status
+
+from 
+(select a.*, y.fault_flag from
+(select distinct batterymoduleid, stationnumber,vehiclemodel from abc
+where latest_run_cell = 1)a
+left join 
+(select distinct z.* from (select * from fault1
+UNION ALL
+select * from fault2
+UNION ALL
+select * from fault3)z)y
+on a.batterymoduleid = y.batterymoduleid)x)w
+left join 
+(select * from time)t
+on w.batterymoduleid = t.batterymoduleid
+group by w.batterymoduleid, w.stationnumber,w.vehiclemodel,w.status, t.lat_time

@@ -1,0 +1,43 @@
+                   Recursion 
+
+Input automatically becomes smaller in recursive problems as a consequence of our actions
+Decisions taken result in input becoming smaller
+
+Identifying recusive problems
+1) Choices given in the problem
+2) Decisions to be taken on the basis of the choices
+
+Eg: Find all subsets of "abc"
+Ans: Including a,b,c or not is a choice
+Decisions taken on each choice lead to each subset
+Decisions taken on including or not including each charecter reduces size of ip
+
+Recursive tree
+Representing decisions taken on input
+ 
+Making recursive tree (ip-op method)
+
+Initialize output
+
+                               op ip
+                            /        \
+                op1 smaller ip           ip2 smaller ip
+            /              \
+    op1 smaller ip      op2 smaller ip  ...          ......
+
+
+eg: input = "ab"
+
+                       op" " | ip "ab" 
+                    /                   \
+                " " | "b"               "a" | "b"  Decision on a
+                /                          \  
+        " " | " "     "b" | " "       "a" | " "      "ab" | " "  Decision on b
+            
+In the last step all inputs are empty
+All outputs represent all possible subsets
+Leaf nodes represent answers
+
+Solving recursive problems :
+1) Design recursive tree
+2) Code with reference to the tree

@@ -1,0 +1,1 @@
+{"name":"Local: 3_Sort_stack","url":"c:\\Users\\ayon.sen\\cpp\\recursion\\3_Sort_stack.cpp","tests":[{"id":1660055114209,"input":"5\n2 3 1 5 4","output":"5 4 3 2 1"}],"interactive":false,"memoryLimit":1024,"timeLimit":3000,"srcPath":"c:\\Users\\ayon.sen\\cpp\\recursion\\3_Sort_stack.cpp","group":"local","local":true}

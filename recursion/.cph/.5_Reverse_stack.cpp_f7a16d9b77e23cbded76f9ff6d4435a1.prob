@@ -1,0 +1,1 @@
+{"name":"Local: 5_Reverse_stack","url":"c:\\Users\\ayon.sen\\cpp\\recursion\\5_Reverse_stack.cpp","tests":[{"id":1660207611195,"input":"5\n1 2 3 4 5","output":"1 2 3 4 5"}],"interactive":false,"memoryLimit":1024,"timeLimit":3000,"srcPath":"c:\\Users\\ayon.sen\\cpp\\recursion\\5_Reverse_stack.cpp","group":"local","local":true}
